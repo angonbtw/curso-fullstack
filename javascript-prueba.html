@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>👽</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>.</h1>
+
+    <script>
+// String — texto, siempre entre comillas
+const nombre = "Anto";
+
+// Number — números, sin comillas
+const edad = 30;
+const precio = 99.5;
+
+// Boolean — solo true o false
+const activo = true;
+const pagado = false;
+
+// Array — lista de valores
+const skills = ["HTML", "CSS", "Git", "JS"];
+
+// Object — conjunto de propiedades
+const persona = {
+    nombre: "Anto",
+    edad: 30,
+    trabajo: "Banco del Bienestar",
+    ciudad: "CDMX"
+};
+
+console.log(nombre);
+console.log(skills[skills.length - 1]);
+console.log(persona.trabajo);
+console.log(persona.ciudad);
+
+function saludar(nombre) {
+    console.log("Hola " + nombre);
+}
+
+saludar("Anto");
+saludar("Beto");
+saludar("Claude");
+
+function presentar (nombre,trabajo) {
+    console.log ("Soy " + nombre + " y trabajo en el " + trabajo)
+}
+presentar("Anto", "Banco del Bienestar");
+
+const sucursales = [
+    { nombre: "CDMX Norte", saldo: 15000 },
+    { nombre: "CDMX Sur", saldo: 8000 },
+    { nombre: "Oaxaca", saldo: 3500 }
+];
+
+const mostrarSucursal = (sucursal) => {
+    console.log(`Sucursal: ${sucursal.nombre} tiene saldo ${sucursal.saldo}`);
+}
+
+sucursales.forEach(function(sucursal) {
+    mostrarSucursal(sucursal);
+});
+
+const saldo = 1000;
+
+if (saldo < 1000) {
+    console.log("Saldo bajo, revisar sucursal");
+} else {
+    console.log("Saldo normal");
+}
+    </script>
+</body>
+</html>
