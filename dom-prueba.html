@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>YEISON XD</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1 id="titulo">👽</h1>
+    <p id="descripcion">¿Que eres hoy?</p>
+    <button id="btn">👽</button>
+    <button id="btnregreso">🙎</button>
+    <input type="text" id="miInput">
+    <button id="btnsaludar">👋</button>
+
+    <script>
+       const titulo = document.getElementById("titulo");
+       const btn = document.getElementById("btn");
+       const btnregreso = document.getElementById("btnregreso");
+       const btnsaludar = document.getElementById("btnsaludar");
+
+        btn.addEventListener("click", () => {
+        titulo.textContent = "Eres un aliencito";
+        });
+
+        btnregreso.addEventListener("click", () => {
+        titulo.textContent = "Eres un humanito";
+        });
+   
+        btnsaludar.addEventListener("click", () => {
+        const nombreUsuario = document.getElementById("miInput").value;
+        titulo.textContent = `Hola ${nombreUsuario}`;
+        });
+   
+
+
+    </script>
+</body>
+</html>
