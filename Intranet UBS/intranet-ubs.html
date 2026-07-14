@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Intranet UBS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-principal: #285C4D;
+            --color-acento: #D4C19C;
+            --color-fondo: #f4f6f9;
+            --color-texto: #222;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+        }
+
+        header {
+            background: var(--color-principal);
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        header span {
+            font-size: 13px;
+            color: var(--color-acento);
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .filtros {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filtros select, .filtros input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .resumen {
+            font-size: 13px;
+            color: #666;
+            margin-left: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        thead {
+            background: var(--color-principal);
+            color: white;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 11px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f0f4ff; }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .operativa { background: #d4edda; color: #1a6b2f; }
+        .no-operativa { background: #f8d7da; color: #842029; }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="../logo.png" alt="Banco del Bienestar" height="50">
+    <div>
+        <h1>Intranet UBS — Directorio de Sucursales</h1>
+        <span>Sistema interno de gestión de sucursales</span>
+    </div>
+</header>
+
+<div class="contenedor">
+    <div class="filtros">
+        <input type="text" id="buscador" placeholder="🔍 Buscar sucursal...">
+        <select id="filtroEntidad">
+            <option value="">Todas las entidades</option>
+        </select>
+        <label class="toggle-label">
+            <input type="checkbox" id="toggleNoOperativas" checked>
+            Mostrar no operativas
+        </label>
+        <span class="resumen" id="resumen"></span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>CC</th>
+                <th>Nombre</th>
+                <th>Formato</th>
+                <th>Entidad</th>
+                <th>Municipio</th>
+                <th>Estatus</th>
+            </tr>
+        </thead>
+        <tbody id="tablaSucursales"></tbody>
+    </table>
+</div>
+
+<script>
+const sucursales = [
+    { cc: "4197", nombre: "CHAPARROSA", formato: "EXPANSIÓN", estatus: "OPERATIVAS", entidad: "ZACATECAS", municipio: "VILLA DE COS" },
+    { cc: "4198", nombre: "VILLANUEVA", formato: "EXPANSIÓN", estatus: "OPERATIVAS", entidad: "ZACATECAS", municipio: "VILLANUEVA" },
+    { cc: "3776", nombre: "EUROPA, ZACATECAS", formato: "EXPANSIÓN", estatus: "OPERATIVAS", entidad: "ZACATECAS", municipio: "ZACATECAS" },
+    { cc: "329", nombre: "AGUASCALIENTES PLAZA CRYSTAL", formato: "TRADICIONAL", estatus: "OPERATIVAS", entidad: "AGUASCALIENTES", municipio: "AGUASCALIENTES" },
+    { cc: "268", nombre: "ENSENADA", formato: "TRADICIONAL", estatus: "OPERATIVAS", entidad: "BAJA CALIFORNIA", municipio: "ENSENADA" },
+    { cc: "224", nombre: "MEXICALI", formato: "TRADICIONAL", estatus: "OPERATIVAS", entidad: "BAJA CALIFORNIA", municipio: "MEXICALI" },
+    { cc: "244", nombre: "TIJUANA", formato: "TRADICIONAL", estatus: "OPERATIVAS", entidad: "BAJA CALIFORNIA", municipio: "TIJUANA" },
+    { cc: "408", nombre: "SPM TIJUANA", formato: "TRADICIONAL", estatus: "NO OPERATIVAS", entidad: "BAJA CALIFORNIA", municipio: "TIJUANA" },
+    { cc: "218", nombre: "LA PAZ", formato: "TRADICIONAL", estatus: "NO OPERATIVAS", entidad: "BAJA CALIFORNIA SUR", municipio: "LA PAZ" }
+];
+
+// Llenar filtro de entidades
+const entidades = [...new Set(sucursales.map(s => s.entidad))].sort();
+const selectEntidad = document.getElementById("filtroEntidad");
+entidades.forEach(entidad => {
+    const option = document.createElement("option");
+    option.value = entidad;
+    option.textContent = entidad;
+    selectEntidad.appendChild(option);
+});
+
+const renderTabla = () => {
+    const busqueda = document.getElementById("buscador").value.toLowerCase();
+    const entidadFiltro = selectEntidad.value;
+    const mostrarNoOp = document.getElementById("toggleNoOperativas").checked;
+
+    const filtradas = sucursales.filter(s => {
+        const coincideBusqueda = s.nombre.toLowerCase().includes(busqueda) || s.cc.includes(busqueda);
+        const coincideEntidad = entidadFiltro === "" || s.entidad === entidadFiltro;
+        const coincideEstatus = mostrarNoOp || s.estatus === "OPERATIVAS";
+        return coincideBusqueda && coincideEntidad && coincideEstatus;
+    });
+
+    const tbody = document.getElementById("tablaSucursales");
+    tbody.innerHTML = "";
+
+    filtradas.forEach(s => {
+        const esOp = s.estatus === "OPERATIVAS";
+        tbody.innerHTML += `
+            <tr>
+                <td>${s.cc}</td>
+                <td>${s.nombre}</td>
+                <td>${s.formato}</td>
+                <td>${s.entidad}</td>
+                <td>${s.municipio}</td>
+                <td><span class="badge ${esOp ? 'operativa' : 'no-operativa'}">${s.estatus}</span></td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("resumen").textContent = `${filtradas.length} sucursales`;
+};
+
+document.getElementById("buscador").addEventListener("input", renderTabla);
+selectEntidad.addEventListener("change", renderTabla);
+document.getElementById("toggleNoOperativas").addEventListener("change", renderTabla);
+
+renderTabla();
+</script>
+
+</body>
+</html>
