@@ -114,13 +114,43 @@
 
         .operativa { background: #d4edda; color: #1a6b2f; }
         .no-operativa { background: #f8d7da; color: #842029; }
-    </style>
+        .tarjetas-resumen {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.tarjeta-stat {
+    background: white;
+    border-radius: 10px;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    min-width: 160px;
+}
+
+.stat-numero {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-principal);
+}
+
+.stat-numero.verde { color: #1a6b2f; }
+.stat-numero.rojo { color: #842029; }
+
+.stat-label {
+    font-size: 12px;
+    color: #888;
+}    
+
+  </style>
 </head>
 <body>
 
 <header>
-    <img src="../logo.png" alt="Banco del Bienestar" height="50">
-    <div>
+        <div>
         <h1>Intranet UBS — Directorio de Sucursales</h1>
         <span>Sistema interno de gestión de sucursales</span>
     </div>
@@ -138,7 +168,20 @@
         </label>
         <span class="resumen" id="resumen"></span>
     </div>
-
+<div class="tarjetas-resumen">
+    <div class="tarjeta-stat">
+        <span class="stat-numero" id="totalSucursales">0</span>
+        <span class="stat-label">Total sucursales</span>
+    </div>
+    <div class="tarjeta-stat">
+        <span class="stat-numero verde" id="totalOperativas">0</span>
+        <span class="stat-label">Operativas</span>
+    </div>
+    <div class="tarjeta-stat">
+        <span class="stat-numero rojo" id="totalNoOperativas">0</span>
+        <span class="stat-label">No operativas</span>
+    </div>
+</div>
     <table>
         <thead>
             <tr>
@@ -207,6 +250,9 @@ const renderTabla = () => {
     });
 
     document.getElementById("resumen").textContent = `${filtradas.length} sucursales`;
+document.getElementById("totalSucursales").textContent = filtradas.length;
+document.getElementById("totalOperativas").textContent = filtradas.filter(s => s.estatus === "OPERATIVAS").length;
+document.getElementById("totalNoOperativas").textContent = filtradas.filter(s => s.estatus === "NO OPERATIVAS").length;
 };
 
 document.getElementById("buscador").addEventListener("input", renderTabla);
