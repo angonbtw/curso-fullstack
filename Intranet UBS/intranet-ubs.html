@@ -198,8 +198,10 @@
 </div>
 
 <script>
-
 const selectEntidad = document.getElementById("filtroEntidad");
+let todasSucursales = [];
+let paginaActual = 1;
+const LIMITE = 3150;
 
 const renderTabla = (sucursales) => {
     const busqueda = document.getElementById("buscador").value.toLowerCase();
@@ -236,25 +238,34 @@ const renderTabla = (sucursales) => {
     document.getElementById("totalNoOperativas").textContent = filtradas.filter(s => s.estatus === "NO OPERATIVAS").length;
 };
 
-// Cargar datos desde el servidor
-fetch('http://localhost:3000/api/sucursales')
-    .then(res => res.json())
-    .then(sucursales => {
-        const entidades = [...new Set(sucursales.map(s => s.entidad))].sort();
-        entidades.forEach(entidad => {
-            const option = document.createElement("option");
-            option.value = entidad;
-            option.textContent = entidad;
-            selectEntidad.appendChild(option);
+const cargarPagina = (pagina) => {
+    fetch(`http://localhost:3000/api/sucursales?pagina=${pagina}&limite=${LIMITE}`)
+        .then(res => res.json())
+        .then(respuesta => {
+            todasSucursales = [...todasSucursales, ...respuesta.datos];
+            renderTabla(todasSucursales);
+
+            if (todasSucursales.length < respuesta.total) {
+                paginaActual++;
+                cargarPagina(paginaActual);
+            } else {
+                // Ya cargaron todas — llenar filtro de entidades
+                const entidades = [...new Set(todasSucursales.map(s => s.entidad))].sort();
+                entidades.forEach(entidad => {
+                    const option = document.createElement("option");
+                    option.value = entidad;
+                    option.textContent = entidad;
+                    selectEntidad.appendChild(option);
+                });
+            }
         });
+};
 
-        renderTabla(sucursales);
+document.getElementById("buscador").addEventListener("input", () => renderTabla(todasSucursales));
+selectEntidad.addEventListener("change", () => renderTabla(todasSucursales));
+document.getElementById("toggleNoOperativas").addEventListener("change", () => renderTabla(todasSucursales));
 
-        document.getElementById("buscador").addEventListener("input", () => renderTabla(sucursales));
-        selectEntidad.addEventListener("change", () => renderTabla(sucursales));
-        document.getElementById("toggleNoOperativas").addEventListener("change", () => renderTabla(sucursales));
-    });
-
+cargarPagina(1);
 </script>
 
 </body>
