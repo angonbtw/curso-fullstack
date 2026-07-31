@@ -144,7 +144,27 @@
     font-size: 12px;
     color: #888;
 }    
+.paginacion {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    justify-content: center;
+}
 
+.paginacion button {
+    background: var(--color-principal);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.paginacion button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
   </style>
 </head>
 <body>
@@ -195,77 +215,92 @@
         </thead>
         <tbody id="tablaSucursales"></tbody>
     </table>
+<div class="paginacion">
+    <button id="btnAnterior" onclick="paginaActual--; cargar()">← Anterior</button>
+    <button id="btnSiguiente" onclick="paginaActual++; cargar()">Siguiente →</button>
+</div>
+
 </div>
 
 <script>
 const selectEntidad = document.getElementById("filtroEntidad");
-let todasSucursales = [];
 let paginaActual = 1;
-const LIMITE = 3150;
+const LIMITE = 50;
+let cargando = false;
+let totalCargado = 0;
+let totalGeneral = 0;
 
-const renderTabla = (sucursales) => {
-    const busqueda = document.getElementById("buscador").value.toLowerCase();
-    const entidadFiltro = selectEntidad.value;
-    const mostrarNoOp = document.getElementById("toggleNoOperativas").checked;
-
-    const filtradas = sucursales.filter(s => {
-        const coincideBusqueda = s.nombre.toLowerCase().includes(busqueda) || s.cc.includes(busqueda);
-        const coincideEntidad = entidadFiltro === "" || s.entidad === entidadFiltro;
-        const coincideEstatus = mostrarNoOp || s.estatus === "OPERATIVAS";
-        return coincideBusqueda && coincideEntidad && coincideEstatus;
-    });
-
-    const tbody = document.getElementById("tablaSucursales");
-    tbody.innerHTML = "";
-
-    filtradas.forEach(s => {
-        const esOp = s.estatus === "OPERATIVAS";
-        tbody.innerHTML += `
-            <tr>
-                <td>${s.cc}</td>
-                <td>${s.nombre}</td>
-                <td>${s.formato}</td>
-                <td>${s.entidad}</td>
-                <td>${s.municipio}</td>
-                <td><span class="badge ${esOp ? 'operativa' : 'no-operativa'}">${s.estatus}</span></td>
-            </tr>
-        `;
-    });
-
-    document.getElementById("resumen").textContent = `${filtradas.length} sucursales`;
-    document.getElementById("totalSucursales").textContent = filtradas.length;
-    document.getElementById("totalOperativas").textContent = filtradas.filter(s => s.estatus === "OPERATIVAS").length;
-    document.getElementById("totalNoOperativas").textContent = filtradas.filter(s => s.estatus === "NO OPERATIVAS").length;
+const renderFila = (s) => {
+    const esOp = s.estatus === "OPERATIVAS";
+    return `
+        <tr>
+            <td>${s.cc}</td>
+            <td>${s.nombre}</td>
+            <td>${s.formato}</td>
+            <td>${s.entidad}</td>
+            <td>${s.municipio}</td>
+            <td><span class="badge ${esOp ? 'operativa' : 'no-operativa'}">${s.estatus}</span></td>
+        </tr>
+    `;
 };
 
-const cargarPagina = (pagina) => {
-    fetch(`http://localhost:3000/api/sucursales?pagina=${pagina}&limite=${LIMITE}`)
+const buscar = () => {
+    paginaActual = 1;
+    totalCargado = 0;
+    document.getElementById("tablaSucursales").innerHTML = "";
+    cargar();
+};
+
+const cargar = () => {
+    const busqueda = document.getElementById("buscador").value;
+    const entidad = selectEntidad.value;
+    const mostrarNoOp = document.getElementById("toggleNoOperativas").checked;
+    const estatus = mostrarNoOp ? '' : 'OPERATIVAS';
+
+    const url = `http://localhost:3000/api/sucursales?pagina=${paginaActual}&limite=${LIMITE}&busqueda=${busqueda}&entidad=${entidad}&estatus=${estatus}`;
+
+    fetch(url)
         .then(res => res.json())
         .then(respuesta => {
-            todasSucursales = [...todasSucursales, ...respuesta.datos];
-            renderTabla(todasSucursales);
+            totalGeneral = respuesta.total;
 
-            if (todasSucursales.length < respuesta.total) {
-                paginaActual++;
-                cargarPagina(paginaActual);
-            } else {
-                // Ya cargaron todas — llenar filtro de entidades
-                const entidades = [...new Set(todasSucursales.map(s => s.entidad))].sort();
-                entidades.forEach(entidad => {
-                    const option = document.createElement("option");
-                    option.value = entidad;
-                    option.textContent = entidad;
-                    selectEntidad.appendChild(option);
-                });
-            }
+            const tbody = document.getElementById("tablaSucursales");
+            tbody.innerHTML = "";
+
+            respuesta.datos.forEach(s => {
+                tbody.innerHTML += renderFila(s);
+            });
+
+            document.getElementById("resumen").textContent = 
+                `Página ${paginaActual} — ${respuesta.datos.length} de ${totalGeneral} sucursales`;
+            
+            document.getElementById("btnAnterior").disabled = paginaActual === 1;
+            document.getElementById("btnSiguiente").disabled = 
+                paginaActual * LIMITE >= totalGeneral;
         });
 };
 
-document.getElementById("buscador").addEventListener("input", () => renderTabla(todasSucursales));
-selectEntidad.addEventListener("change", () => renderTabla(todasSucursales));
-document.getElementById("toggleNoOperativas").addEventListener("change", () => renderTabla(todasSucursales));
+// Cargar entidades para el filtro
+fetch('http://localhost:3000/api/resumen')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("totalSucursales").textContent = data.total;
+        document.getElementById("totalOperativas").textContent = data.operativas;
+        document.getElementById("totalNoOperativas").textContent = data.noOperativas;
 
-cargarPagina(1);
+        Object.keys(data.porEntidad).sort().forEach(entidad => {
+            const option = document.createElement("option");
+            option.value = entidad;
+            option.textContent = entidad;
+            selectEntidad.appendChild(option);
+        });
+    });
+
+document.getElementById("buscador").addEventListener("input", buscar);
+selectEntidad.addEventListener("change", buscar);
+document.getElementById("toggleNoOperativas").addEventListener("change", buscar);
+
+cargar();
 </script>
 
 </body>
