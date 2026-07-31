@@ -55,9 +55,22 @@
             border-radius: 6px;
             font-size: 14px;
             background: white;
+            font-family: 'Noto Sans', sans-serif;
         }
 
         .filtros input { min-width: 220px; }
+
+        #btnExportar {
+            background: var(--color-acento);
+            color: var(--color-principal);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Noto Sans', sans-serif;
+        }
 
         .resumen {
             font-size: 13px;
@@ -128,12 +141,12 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            font-family: 'Noto Sans', sans-serif;
         }
 
         .paginacion button:disabled { background: #ccc; cursor: not-allowed; }
         .paginacion span { font-size: 13px; color: #666; }
 
-        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -150,7 +163,6 @@
         .modal {
             background: white;
             border-radius: 12px;
-            padding: 32px;
             max-width: 700px;
             width: 90%;
             max-height: 85vh;
@@ -158,17 +170,29 @@
             position: relative;
         }
 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: var(--color-principal);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h2 { color: white; font-size: 16px; font-weight: 600; }
+        .modal-header span { font-size: 12px; color: var(--color-acento); margin-top: 4px; display: block; }
+
         .modal-cerrar {
-            position: absolute;
-            top: 16px; right: 16px;
             background: none;
             border: none;
             font-size: 20px;
             cursor: pointer;
-            color: #666;
+            color: white;
+            line-height: 1;
         }
 
-        .modal h2 { color: var(--color-principal); margin-bottom: 20px; font-size: 18px; }
+        .modal-body { padding: 24px; }
 
         .modal-grid {
             display: grid;
@@ -195,6 +219,7 @@
             text-decoration: none;
             text-align: center;
             font-size: 14px;
+            font-family: 'Noto Sans', sans-serif;
         }
     </style>
 </head>
@@ -223,6 +248,7 @@
             <option value="OPERATIVAS">Operativas</option>
             <option value="NO OPERATIVAS">No operativas</option>
         </select>
+        <button id="btnExportar" onclick="exportar()">⬇ Exportar Excel</button>
         <span class="resumen" id="resumen"></span>
     </div>
 
@@ -262,13 +288,20 @@
     </div>
 </div>
 
-<!-- Modal detalle -->
+<!-- Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="cerrarModal(event)">
     <div class="modal">
-        <button class="modal-cerrar" onclick="document.getElementById('modalOverlay').classList.remove('activo')">✕</button>
-        <h2 id="modalNombre"></h2>
-        <div class="modal-grid" id="modalContenido"></div>
-        <a id="modalMaps" class="modal-maps" target="_blank">📍 Ver en Google Maps</a>
+        <div class="modal-header">
+            <div>
+                <h2 id="modalNombre"></h2>
+                <span id="modalCC"></span>
+            </div>
+            <button class="modal-cerrar" onclick="document.getElementById('modalOverlay').classList.remove('activo')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-grid" id="modalContenido"></div>
+            <a id="modalMaps" class="modal-maps" target="_blank">📍 Ver en Google Maps</a>
+        </div>
     </div>
 </div>
 
@@ -280,34 +313,36 @@ let totalGeneral = 0;
 
 const abrirModal = (s) => {
     document.getElementById("modalNombre").textContent = s.nombre;
+    document.getElementById("modalCC").textContent = `CC: ${s.cc} — ${s.estatus}`;
     document.getElementById("modalMaps").href = s.maps || '#';
     document.getElementById("modalMaps").style.display = s.maps ? 'block' : 'none';
 
     document.getElementById("modalContenido").innerHTML = `
-    <div class="modal-campo"><label>CC</label><span>${s.cc}</span></div>
-    <div class="modal-campo"><label>Estatus</label><span>${s.estatus}</span></div>
-    <div class="modal-campo"><label>Formato</label><span>${s.formato}</span></div>
-    <div class="modal-campo"><label>Clave SEDENA</label><span>${s.claveSedena}</span></div>
-    <div class="modal-campo"><label>Entidad</label><span>${s.entidad}</span></div>
-    <div class="modal-campo"><label>Municipio</label><span>${s.municipio}</span></div>
-    <div class="modal-campo"><label>Localidad</label><span>${s.localidad}</span></div>
-    <div class="modal-campo"><label>Colonia</label><span>${s.colonia}</span></div>
-    <div class="modal-campo"><label>Vialidad</label><span>${s.vialidad} ${s.exterior}</span></div>
-    <div class="modal-campo"><label>C.P.</label><span>${s.cp}</span></div>
-    <div class="modal-campo"><label>Referencias</label><span>${s.referencias}</span></div>
-    <div class="modal-campo"><label>Dirección</label><span>${s.direccion}</span></div>
-    <div class="modal-campo"><label>Subdirección</label><span>${s.subdireccion}</span></div>
-    <div class="modal-campo"><label>Subdirectora</label><span>${s.nombreSubdirectora}</span></div>
-    <div class="modal-campo"><label>Gerencia</label><span>${s.gerencia}</span></div>
-    <div class="modal-campo"><label>Gerente</label><span>${s.nombreGerente}</span></div>
-    <div class="modal-campo"><label>Coordinación</label><span>${s.coordinacion}</span></div>
-    <div class="modal-campo"><label>Coordinador</label><span>${s.nombreCoordinador}</span></div>
-    <div class="modal-campo"><label>Cajeros ATM</label><span>${s.cajeros}</span></div>
-    <div class="modal-campo"><label>Ventanillas</label><span>${s.ventanillas}</span></div>
-    <div class="modal-campo"><label>Transaccionalidad</label><span>${s.transaccionalidad}</span></div>
-    <div class="modal-campo"><label>Entorno</label><span>${s.entornoSocio}</span></div>
-    <div class="modal-campo"><label>Fecha apertura</label><span>${s.fechaApertura}</span></div>
-`;
+        <div class="modal-campo"><label>CC</label><span>${s.cc}</span></div>
+        <div class="modal-campo"><label>Estatus</label><span>${s.estatus}</span></div>
+        <div class="modal-campo"><label>Formato</label><span>${s.formato}</span></div>
+        <div class="modal-campo"><label>Clave SEDENA</label><span>${s.claveSedena}</span></div>
+        <div class="modal-campo"><label>Entidad</label><span>${s.entidad}</span></div>
+        <div class="modal-campo"><label>Municipio</label><span>${s.municipio}</span></div>
+        <div class="modal-campo"><label>Localidad</label><span>${s.localidad}</span></div>
+        <div class="modal-campo"><label>Colonia</label><span>${s.colonia}</span></div>
+        <div class="modal-campo"><label>Vialidad</label><span>${s.vialidad} ${s.exterior}</span></div>
+        <div class="modal-campo"><label>C.P.</label><span>${s.cp}</span></div>
+        <div class="modal-campo"><label>Referencias</label><span>${s.referencias}</span></div>
+        <div class="modal-campo"><label>Dirección</label><span>${s.direccion}</span></div>
+        <div class="modal-campo"><label>Subdirección</label><span>${s.subdireccion}</span></div>
+        <div class="modal-campo"><label>Subdirectora</label><span>${s.nombreSubdirectora}</span></div>
+        <div class="modal-campo"><label>Gerencia</label><span>${s.gerencia}</span></div>
+        <div class="modal-campo"><label>Gerente</label><span>${s.nombreGerente}</span></div>
+        <div class="modal-campo"><label>Coordinación</label><span>${s.coordinacion}</span></div>
+        <div class="modal-campo"><label>Coordinador</label><span>${s.nombreCoordinador}</span></div>
+        <div class="modal-campo"><label>Cajeros ATM</label><span>${s.cajeros}</span></div>
+        <div class="modal-campo"><label>ID Cajeros</label><span>${s.idCajeros}</span></div>
+        <div class="modal-campo"><label>Ventanillas</label><span>${s.ventanillas}</span></div>
+        <div class="modal-campo"><label>Transaccionalidad</label><span>${s.transaccionalidad}</span></div>
+        <div class="modal-campo"><label>Entorno</label><span>${s.entornoSocio}</span></div>
+        <div class="modal-campo"><label>Fecha apertura</label><span>${s.fechaApertura}</span></div>
+    `;
 
     document.getElementById("modalOverlay").classList.add("activo");
 };
@@ -362,6 +397,15 @@ const cambiarPagina = (dir) => {
 };
 
 const buscar = () => { paginaActual = 1; cargar(); };
+
+const exportar = () => {
+    const busqueda = document.getElementById("buscador").value;
+    const entidad = selectEntidad.value;
+    const formato = document.getElementById("filtroFormato").value;
+    const estatus = document.getElementById("filtroEstatus").value;
+    const url = `http://localhost:3000/api/exportar-excel?busqueda=${encodeURIComponent(busqueda)}&entidad=${encodeURIComponent(entidad)}&estatus=${encodeURIComponent(estatus)}&formato=${encodeURIComponent(formato)}`;
+    window.location.href = url;
+};
 
 fetch('http://localhost:3000/api/resumen')
     .then(res => res.json())
