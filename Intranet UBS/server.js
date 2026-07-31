@@ -94,14 +94,30 @@ app.get('/api/resumen', (req, res) => {
     const sucursales = cargarSucursales();
     const operativas = sucursales.filter(s => s.estatus === 'OPERATIVAS').length;
     const noOperativas = sucursales.filter(s => s.estatus === 'NO OPERATIVAS').length;
-    const porEntidad = sucursales.reduce((acc, s) => {
-        if (!acc[s.entidad]) acc[s.entidad] = { total: 0, operativas: 0, noOperativas: 0 };
-        acc[s.entidad].total++;
-        if (s.estatus === 'OPERATIVAS') acc[s.entidad].operativas++;
-        else acc[s.entidad].noOperativas++;
+    const totalCajeros = sucursales.reduce((sum, s) => sum + (Number(s.cajeros) || 0), 0);
+
+    const agrupar = (campo) => sucursales.reduce((acc, s) => {
+        const clave = s[campo] || 'Sin información';
+        if (!acc[clave]) acc[clave] = { total: 0, operativas: 0, noOperativas: 0 };
+        acc[clave].total++;
+        if (s.estatus === 'OPERATIVAS') acc[clave].operativas++;
+        else acc[clave].noOperativas++;
         return acc;
     }, {});
-    res.json({ total: sucursales.length, operativas, noOperativas, porEntidad });
+
+   res.json({
+    total: sucursales.length,
+    operativas,
+    noOperativas,
+    totalCajeros,
+    porEntidad: agrupar('entidad'),
+    porDireccion: agrupar('direccion'),
+    porSubdireccion: agrupar('subdireccion'),
+    porGerencia: agrupar('gerencia'),
+    porFormato: agrupar('formato'),
+    porTransaccionalidad: agrupar('transaccionalidad'),
+    porEntorno: agrupar('entornoSocio'),
+});
 });
 
 app.get('/api/exportar-excel', (req, res) => {

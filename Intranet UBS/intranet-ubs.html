@@ -2,223 +2,273 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Intranet UBS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Intranet UBS — Directorio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --color-principal: #285C4D;
-            --color-acento: #D4C19C;
-            --color-fondo: #f4f6f9;
-            --color-texto: #222;
+            --verde: #285C4D;
+            --acento: #D4C19C;
+            --fondo: #f0f2f5;
+            --verde-op: #1a6b2f;
+            --rojo-op: #842029;
+            --verde-bg: #d4edda;
+            --rojo-bg: #f8d7da;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Noto Sans', sans-serif;
-            background: var(--color-fondo);
-            color: var(--color-texto);
-        }
+        body { font-family: 'Noto Sans', sans-serif; background: var(--fondo); color: #1a1a1a; font-size: 13px; }
 
         header {
-            background: var(--color-principal);
-            color: white;
-            padding: 16px 32px;
+            background: var(--verde);
+            padding: 13px 28px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
-        header h1 { font-size: 20px; font-weight: 600; }
-        header span { font-size: 13px; color: var(--color-acento); }
+        .header-left h1 { font-size: 16px; font-weight: 600; color: white; }
+        .header-left span { font-size: 11px; color: var(--acento); }
 
-        .contenedor {
-            max-width: 1400px;
-            margin: 32px auto;
-            padding: 0 24px;
+        nav { display: flex; align-items: center; gap: 4px; }
+        nav a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 5px;
+            transition: all 0.15s;
+        }
+        nav a:hover { color: white; background: rgba(255,255,255,0.1); }
+        nav a.activo { color: white; background: rgba(255,255,255,0.15); font-weight: 600; }
+
+        .btn-nav {
+            background: var(--acento);
+            color: var(--verde);
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Noto Sans', sans-serif;
+            margin-left: 8px;
         }
 
-        .filtros {
+        .wrap { max-width: 1500px; margin: 20px auto; padding: 0 24px; }
+
+        /* Filtros */
+        .filtros-wrap {
+            background: white;
+            border-radius: 8px;
+            padding: 14px 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin-bottom: 14px;
+        }
+
+        .filtros-row {
             display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 10px;
             align-items: center;
             flex-wrap: wrap;
         }
 
-        .filtros select, .filtros input {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
+        .filtros-row input, .filtros-row select {
+            padding: 7px 11px;
+            border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 12px;
             background: white;
             font-family: 'Noto Sans', sans-serif;
+            color: #333;
+            outline: none;
+            transition: border 0.15s;
         }
 
-        .filtros input { min-width: 220px; }
+        .filtros-row input:focus, .filtros-row select:focus { border-color: var(--verde); }
+        .filtros-row input.buscador-main { min-width: 260px; }
 
-        #btnExportar {
-            background: var(--color-acento);
-            color: var(--color-principal);
+        .btn-exportar {
+            background: var(--verde);
+            color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 7px 14px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             font-family: 'Noto Sans', sans-serif;
-        }
-
-        .resumen {
-            font-size: 13px;
-            color: #666;
             margin-left: auto;
         }
 
-        .tarjetas-resumen {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .tarjeta-stat {
-            background: white;
-            border-radius: 10px;
-            padding: 16px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            min-width: 160px;
-        }
-
-        .stat-numero { font-size: 28px; font-weight: 700; color: var(--color-principal); }
-        .stat-numero.verde { color: #1a6b2f; }
-        .stat-numero.rojo { color: #842029; }
-        .stat-label { font-size: 12px; color: #888; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
-        thead { background: var(--color-principal); color: white; }
-        th { padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 500; }
-        td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid #eee; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #f0f4ff; cursor: pointer; }
-
-        .badge {
-            padding: 3px 10px;
-            border-radius: 99px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .operativa { background: #d4edda; color: #1a6b2f; }
-        .no-operativa { background: #f8d7da; color: #842029; }
-
-        .paginacion {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .paginacion button {
-            background: var(--color-principal);
-            color: white;
+        .btn-limpiar {
+            background: #f0f0f0;
+            color: #555;
             border: none;
-            padding: 8px 20px;
+            padding: 7px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-family: 'Noto Sans', sans-serif;
         }
 
-        .paginacion button:disabled { background: #ccc; cursor: not-allowed; }
-        .paginacion span { font-size: 13px; color: #666; }
+        .resumen-texto { font-size: 11px; color: #888; white-space: nowrap; }
 
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 200;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-overlay.activo { display: flex; }
-
-        .modal {
-            background: white;
-            border-radius: 12px;
-            max-width: 700px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .modal-header {
+        /* KPIs mini */
+        .kpis-mini {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            background: var(--color-principal);
-            color: white;
-            padding: 20px 24px;
-            border-radius: 12px 12px 0 0;
+            gap: 10px;
+            margin-bottom: 14px;
         }
 
-        .modal-header h2 { color: white; font-size: 16px; font-weight: 600; }
-        .modal-header span { font-size: 12px; color: var(--color-acento); margin-top: 4px; display: block; }
-
-        .modal-cerrar {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: white;
-            line-height: 1;
-        }
-
-        .modal-body { padding: 24px; }
-
-        .modal-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .modal-campo {
+        .kpi-mini {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
             display: flex;
             flex-direction: column;
             gap: 2px;
+            border-left: 3px solid #ddd;
         }
 
-        .modal-campo label { font-size: 11px; color: #888; text-transform: uppercase; }
-        .modal-campo span { font-size: 13px; font-weight: 500; color: #222; }
+        .kpi-mini.kv { border-left-color: var(--verde); }
+        .kpi-mini.kop { border-left-color: var(--verde-op); }
+        .kpi-mini.kno { border-left-color: var(--rojo-op); }
 
-        .modal-maps {
-            margin-top: 20px;
-            display: block;
-            background: var(--color-principal);
+        .kpi-mini-val { font-size: 22px; font-weight: 700; color: var(--verde); }
+        .kpi-mini.kop .kpi-mini-val { color: var(--verde-op); }
+        .kpi-mini.kno .kpi-mini-val { color: var(--rojo-op); }
+        .kpi-mini-lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.4px; }
+
+        /* Tabla */
+        .tabla-wrap {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--verde); }
+        th {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
             color: white;
-            padding: 10px 20px;
+            letter-spacing: 0.3px;
+        }
+        td { padding: 9px 14px; border-bottom: 1px solid #f2f2f2; font-size: 12px; }
+        tr:last-child td { border-bottom: none; }
+        tr.row-click:hover td { background: #f5f9ff; cursor: pointer; }
+
+        .badge { padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; }
+        .op { background: var(--verde-bg); color: var(--verde-op); }
+        .no-op { background: var(--rojo-bg); color: var(--rojo-op); }
+
+        .tag-formato {
+            background: #EAF3DE;
+            color: #3B6D11;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Paginación */
+        .paginacion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 14px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn-pag {
+            background: var(--verde);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+        .btn-pag:disabled { background: #ddd; cursor: not-allowed; color: #aaa; }
+        .pag-info { font-size: 12px; color: #666; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.on { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 10px;
+            max-width: 780px;
+            width: 95%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-head {
+            background: var(--verde);
+            padding: 16px 22px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-shrink: 0;
+        }
+
+        .modal-head h2 { color: white; font-size: 15px; }
+        .modal-head small { color: var(--acento); font-size: 11px; display: block; margin-top: 3px; }
+        .modal-cerrar { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .campo { display: flex; flex-direction: column; gap: 2px; }
+        .campo label { font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.4px; }
+        .campo span { font-size: 12px; font-weight: 500; color: #222; }
+
+        .seccion-modal {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--verde);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin: 14px 0 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #eee;
+            grid-column: 1 / -1;
+        }
+
+        .btn-maps {
+            display: block;
+            margin-top: 16px;
+            background: var(--verde);
+            color: white;
+            padding: 9px 20px;
             border-radius: 6px;
             text-decoration: none;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             font-family: 'Noto Sans', sans-serif;
         }
     </style>
@@ -226,208 +276,246 @@
 <body>
 
 <header>
-    <div>
+    <div class="header-left">
         <h1>Intranet UBS — Directorio de Sucursales</h1>
         <span>Sistema interno de gestión de sucursales</span>
     </div>
+    <nav>
+        <a href="dashboard.html">← Dashboard</a>
+        <a href="intranet-ubs.html" class="activo">Directorio</a>
+        <button class="btn-nav" onclick="exportar()">⬇ Exportar Excel</button>
+    </nav>
 </header>
 
-<div class="contenedor">
-    <div class="filtros">
-        <input type="text" id="buscador" placeholder="🔍 Buscar por CC, nombre o municipio...">
-        <select id="filtroEntidad">
-            <option value="">Todas las entidades</option>
-        </select>
-        <select id="filtroFormato">
-            <option value="">Todos los formatos</option>
-            <option value="TRADICIONAL">Tradicional</option>
-            <option value="EXPANSIÓN">Expansión</option>
-        </select>
-        <select id="filtroEstatus">
-            <option value="">Todos los estatus</option>
-            <option value="OPERATIVAS">Operativas</option>
-            <option value="NO OPERATIVAS">No operativas</option>
-        </select>
-        <button id="btnExportar" onclick="exportar()">⬇ Exportar Excel</button>
-        <span class="resumen" id="resumen"></span>
+<div class="wrap">
+
+    <!-- KPIs -->
+    <div class="kpis-mini">
+        <div class="kpi-mini kv"><div class="kpi-mini-val" id="kTotal">...</div><div class="kpi-mini-lbl">Total</div></div>
+        <div class="kpi-mini kop"><div class="kpi-mini-val" id="kOp">...</div><div class="kpi-mini-lbl">Operativas</div></div>
+        <div class="kpi-mini kno"><div class="kpi-mini-val" id="kNo">...</div><div class="kpi-mini-lbl">No operativas</div></div>
     </div>
 
-    <div class="tarjetas-resumen">
-        <div class="tarjeta-stat">
-            <span class="stat-numero" id="totalSucursales">...</span>
-            <span class="stat-label">Total sucursales</span>
-        </div>
-        <div class="tarjeta-stat">
-            <span class="stat-numero verde" id="totalOperativas">...</span>
-            <span class="stat-label">Operativas</span>
-        </div>
-        <div class="tarjeta-stat">
-            <span class="stat-numero rojo" id="totalNoOperativas">...</span>
-            <span class="stat-label">No operativas</span>
+    <!-- Filtros -->
+    <div class="filtros-wrap">
+        <div class="filtros-row">
+            <input class="buscador-main" type="text" id="buscador" placeholder="🔍 Buscar por CC, nombre o municipio...">
+            <select id="fEntidad"><option value="">Todas las entidades</option></select>
+            <select id="fFormato">
+                <option value="">Todos los formatos</option>
+                <option value="TRADICIONAL">Tradicional</option>
+                <option value="EXPANSIÓN">Expansión</option>
+            </select>
+            <select id="fEstatus">
+                <option value="">Todos los estatus</option>
+                <option value="OPERATIVAS">Operativas</option>
+                <option value="NO OPERATIVAS">No operativas</option>
+            </select>
+            <select id="fDireccion"><option value="">Todas las direcciones</option></select>
+            <button class="btn-limpiar" onclick="limpiar()">✕ Limpiar</button>
+            <span class="resumen-texto" id="resumen"></span>
+            <button class="btn-exportar" onclick="exportar()">⬇ Exportar Excel</button>
         </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>CC</th>
-                <th>Nombre</th>
-                <th>Formato</th>
-                <th>Entidad</th>
-                <th>Municipio</th>
-                <th>Estatus</th>
-            </tr>
-        </thead>
-        <tbody id="tablaSucursales"></tbody>
-    </table>
-
-    <div class="paginacion">
-        <button id="btnAnterior" onclick="cambiarPagina(-1)">← Anterior</button>
-        <span id="infoPagina"></span>
-        <button id="btnSiguiente" onclick="cambiarPagina(1)">Siguiente →</button>
+    <!-- Tabla -->
+    <div class="tabla-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>CC</th>
+                    <th>Nombre de sucursal</th>
+                    <th>Formato</th>
+                    <th>Entidad</th>
+                    <th>Municipio</th>
+                    <th>Dirección</th>
+                    <th>Estatus</th>
+                </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+        <div class="paginacion">
+            <button class="btn-pag" id="btnAnt" onclick="cambiar(-1)">← Anterior</button>
+            <span class="pag-info" id="pagInfo"></span>
+            <button class="btn-pag" id="btnSig" onclick="cambiar(1)">Siguiente →</button>
+        </div>
     </div>
+
 </div>
 
 <!-- Modal -->
-<div class="modal-overlay" id="modalOverlay" onclick="cerrarModal(event)">
+<div class="modal-overlay" id="mOverlay" onclick="if(event.target.id==='mOverlay')cerrar()">
     <div class="modal">
-        <div class="modal-header">
-            <div>
-                <h2 id="modalNombre"></h2>
-                <span id="modalCC"></span>
-            </div>
-            <button class="modal-cerrar" onclick="document.getElementById('modalOverlay').classList.remove('activo')">✕</button>
+        <div class="modal-head">
+            <div><h2 id="mNombre"></h2><small id="mCC"></small></div>
+            <button class="modal-cerrar" onclick="cerrar()">✕</button>
         </div>
         <div class="modal-body">
-            <div class="modal-grid" id="modalContenido"></div>
-            <a id="modalMaps" class="modal-maps" target="_blank">📍 Ver en Google Maps</a>
+            <div class="modal-grid" id="mGrid"></div>
+            <a id="mMaps" class="btn-maps" target="_blank">📍 Ver en Google Maps</a>
         </div>
     </div>
 </div>
 
 <script>
-const selectEntidad = document.getElementById("filtroEntidad");
-let paginaActual = 1;
+const $ = id => document.getElementById(id);
+const selectEnt = $('fEntidad');
+const selectDir = $('fDireccion');
+let pagina = 1;
 const LIMITE = 50;
-let totalGeneral = 0;
+let totalGlobal = 0;
+
+const cerrar = () => $('mOverlay').classList.remove('on');
 
 const abrirModal = (s) => {
-    document.getElementById("modalNombre").textContent = s.nombre;
-    document.getElementById("modalCC").textContent = `CC: ${s.cc} — ${s.estatus}`;
-    document.getElementById("modalMaps").href = s.maps || '#';
-    document.getElementById("modalMaps").style.display = s.maps ? 'block' : 'none';
+    $('mNombre').textContent = s.nombre;
+    $('mCC').textContent = `CC: ${s.cc} · ${s.formato} · ${s.estatus}`;
+    $('mMaps').href = s.maps || '#';
+    $('mMaps').style.display = s.maps ? 'block' : 'none';
 
-    document.getElementById("modalContenido").innerHTML = `
-        <div class="modal-campo"><label>CC</label><span>${s.cc}</span></div>
-        <div class="modal-campo"><label>Estatus</label><span>${s.estatus}</span></div>
-        <div class="modal-campo"><label>Formato</label><span>${s.formato}</span></div>
-        <div class="modal-campo"><label>Clave SEDENA</label><span>${s.claveSedena}</span></div>
-        <div class="modal-campo"><label>Entidad</label><span>${s.entidad}</span></div>
-        <div class="modal-campo"><label>Municipio</label><span>${s.municipio}</span></div>
-        <div class="modal-campo"><label>Localidad</label><span>${s.localidad}</span></div>
-        <div class="modal-campo"><label>Colonia</label><span>${s.colonia}</span></div>
-        <div class="modal-campo"><label>Vialidad</label><span>${s.vialidad} ${s.exterior}</span></div>
-        <div class="modal-campo"><label>C.P.</label><span>${s.cp}</span></div>
-        <div class="modal-campo"><label>Referencias</label><span>${s.referencias}</span></div>
-        <div class="modal-campo"><label>Dirección</label><span>${s.direccion}</span></div>
-        <div class="modal-campo"><label>Subdirección</label><span>${s.subdireccion}</span></div>
-        <div class="modal-campo"><label>Subdirectora</label><span>${s.nombreSubdirectora}</span></div>
-        <div class="modal-campo"><label>Gerencia</label><span>${s.gerencia}</span></div>
-        <div class="modal-campo"><label>Gerente</label><span>${s.nombreGerente}</span></div>
-        <div class="modal-campo"><label>Coordinación</label><span>${s.coordinacion}</span></div>
-        <div class="modal-campo"><label>Coordinador</label><span>${s.nombreCoordinador}</span></div>
-        <div class="modal-campo"><label>Cajeros ATM</label><span>${s.cajeros}</span></div>
-        <div class="modal-campo"><label>ID Cajeros</label><span>${s.idCajeros}</span></div>
-        <div class="modal-campo"><label>Ventanillas</label><span>${s.ventanillas}</span></div>
-        <div class="modal-campo"><label>Transaccionalidad</label><span>${s.transaccionalidad}</span></div>
-        <div class="modal-campo"><label>Entorno</label><span>${s.entornoSocio}</span></div>
-        <div class="modal-campo"><label>Fecha apertura</label><span>${s.fechaApertura}</span></div>
+    $('mGrid').innerHTML = `
+        <div class="seccion-modal">Identificación</div>
+        <div class="campo"><label>Centro de Costos</label><span>${s.cc}</span></div>
+        <div class="campo"><label>Clave SEDENA</label><span>${s.claveSedena || '—'}</span></div>
+        <div class="campo"><label>Formato</label><span>${s.formato}</span></div>
+        <div class="campo"><label>Estatus</label><span>${s.estatus}</span></div>
+        <div class="campo"><label>Fecha de apertura</label><span>${s.fechaApertura || '—'}</span></div>
+        <div class="campo"><label>Entorno sociodemográfico</label><span>${s.entornoSocio || '—'}</span></div>
+
+        <div class="seccion-modal">Ubicación</div>
+        <div class="campo"><label>Entidad</label><span>${s.entidad}</span></div>
+        <div class="campo"><label>Municipio</label><span>${s.municipio}</span></div>
+        <div class="campo"><label>Localidad</label><span>${s.localidad || '—'}</span></div>
+        <div class="campo"><label>Colonia</label><span>${s.colonia || '—'}</span></div>
+        <div class="campo"><label>Vialidad y número</label><span>${s.vialidad || ''} ${s.exterior || ''}</span></div>
+        <div class="campo"><label>C.P.</label><span>${s.cp || '—'}</span></div>
+        <div class="campo" style="grid-column:1/-1"><label>Referencias</label><span>${s.referencias || '—'}</span></div>
+        <div class="campo" style="grid-column:1/-1"><label>Domicilio completo</label><span>${s.direccionCompleta || '—'}</span></div>
+
+        <div class="seccion-modal">Estructura organizacional</div>
+        <div class="campo"><label>Dirección</label><span>${s.direccion || '—'}</span></div>
+        <div class="campo"><label>Subdirección</label><span>${s.subdireccion || '—'}</span></div>
+        <div class="campo"><label>Nombre subdirectora</label><span>${s.nombreSubdirectora || '—'}</span></div>
+        <div class="campo"><label>Gerencia</label><span>${s.gerencia || '—'}</span></div>
+        <div class="campo"><label>Nombre gerente</label><span>${s.nombreGerente || '—'}</span></div>
+        <div class="campo"><label>Coordinación estatal</label><span>${s.coordinacion || '—'}</span></div>
+        <div class="campo" style="grid-column:1/-1"><label>Nombre coordinador(a)</label><span>${s.nombreCoordinador || '—'}</span></div>
+
+        <div class="seccion-modal">Operación</div>
+        <div class="campo"><label>Cajeros ATM</label><span>${s.cajeros || '0'}</span></div>
+        <div class="campo"><label>ID Cajeros</label><span>${s.idCajeros || '—'}</span></div>
+        <div class="campo"><label>Ventanillas activas</label><span>${s.ventanillas || '0'}</span></div>
+        <div class="campo"><label>Transaccionalidad</label><span>${s.transaccionalidad || '—'}</span></div>
     `;
 
-    document.getElementById("modalOverlay").classList.add("activo");
-};
-
-const cerrarModal = (e) => {
-    if (e.target === document.getElementById("modalOverlay")) {
-        document.getElementById("modalOverlay").classList.remove("activo");
-    }
+    $('mOverlay').classList.add('on');
 };
 
 const renderFila = (s) => {
-    const esOp = s.estatus === "OPERATIVAS";
-    return `
-        <tr onclick='abrirModal(${JSON.stringify(s)})'>
-            <td>${s.cc}</td>
-            <td>${s.nombre}</td>
-            <td>${s.formato}</td>
-            <td>${s.entidad}</td>
-            <td>${s.municipio}</td>
-            <td><span class="badge ${esOp ? 'operativa' : 'no-operativa'}">${s.estatus}</span></td>
-        </tr>
+    const esOp = s.estatus === 'OPERATIVAS';
+    const tr = document.createElement('tr');
+    tr.className = 'row-click';
+    tr.onclick = () => abrirModal(s);
+    tr.innerHTML = `
+        <td><strong>${s.cc}</strong></td>
+        <td>${s.nombre}</td>
+        <td><span class="tag-formato">${s.formato}</span></td>
+        <td>${s.entidad}</td>
+        <td>${s.municipio}</td>
+        <td style="color:#888">${s.direccion || '—'}</td>
+        <td><span class="badge ${esOp?'op':'no-op'}">${s.estatus}</span></td>
     `;
+    return tr;
 };
 
 const cargar = () => {
-    const busqueda = document.getElementById("buscador").value;
-    const entidad = selectEntidad.value;
-    const formato = document.getElementById("filtroFormato").value;
-    const estatus = document.getElementById("filtroEstatus").value;
+    const busqueda = $('buscador').value;
+    const entidad = selectEnt.value;
+    const formato = $('fFormato').value;
+    const estatus = $('fEstatus').value;
+    const dir = selectDir.value;
 
-    const url = `http://localhost:3000/api/sucursales?pagina=${paginaActual}&limite=${LIMITE}&busqueda=${encodeURIComponent(busqueda)}&entidad=${encodeURIComponent(entidad)}&estatus=${encodeURIComponent(estatus)}&formato=${encodeURIComponent(formato)}`;
+    const url = `http://localhost:3000/api/sucursales?pagina=${pagina}&limite=${LIMITE}`
+        + `&busqueda=${encodeURIComponent(busqueda)}`
+        + `&entidad=${encodeURIComponent(entidad)}`
+        + `&estatus=${encodeURIComponent(estatus)}`
+        + `&formato=${encodeURIComponent(formato)}`
+        + `&direccion=${encodeURIComponent(dir)}`;
 
     fetch(url)
-        .then(res => res.json())
-        .then(respuesta => {
-            totalGeneral = respuesta.total;
-            const tbody = document.getElementById("tablaSucursales");
-            tbody.innerHTML = "";
-            respuesta.datos.forEach(s => { tbody.innerHTML += renderFila(s); });
+        .then(r => r.json())
+        .then(resp => {
+            totalGlobal = resp.total;
+            const tbody = $('tbody');
+            tbody.innerHTML = '';
+            resp.datos.forEach(s => tbody.appendChild(renderFila(s)));
 
-            const totalPaginas = Math.ceil(totalGeneral / LIMITE);
-            document.getElementById("resumen").textContent = `${totalGeneral} sucursales`;
-            document.getElementById("infoPagina").textContent = `Página ${paginaActual} de ${totalPaginas}`;
-            document.getElementById("btnAnterior").disabled = paginaActual === 1;
-            document.getElementById("btnSiguiente").disabled = paginaActual >= totalPaginas;
+            const totalPags = Math.ceil(totalGlobal / LIMITE);
+            $('resumen').textContent = `${totalGlobal.toLocaleString('es-MX')} sucursales`;
+            $('pagInfo').textContent = `Página ${pagina} de ${totalPags}`;
+            $('btnAnt').disabled = pagina === 1;
+            $('btnSig').disabled = pagina >= totalPags;
         });
 };
 
-const cambiarPagina = (dir) => {
-    paginaActual += dir;
-    cargar();
+const cambiar = (dir) => { pagina += dir; cargar(); };
+const buscar = () => { pagina = 1; cargar(); };
+const limpiar = () => {
+    $('buscador').value = '';
+    selectEnt.value = '';
+    $('fFormato').value = '';
+    $('fEstatus').value = '';
+    selectDir.value = '';
+    buscar();
 };
-
-const buscar = () => { paginaActual = 1; cargar(); };
 
 const exportar = () => {
-    const busqueda = document.getElementById("buscador").value;
-    const entidad = selectEntidad.value;
-    const formato = document.getElementById("filtroFormato").value;
-    const estatus = document.getElementById("filtroEstatus").value;
-    const url = `http://localhost:3000/api/exportar-excel?busqueda=${encodeURIComponent(busqueda)}&entidad=${encodeURIComponent(entidad)}&estatus=${encodeURIComponent(estatus)}&formato=${encodeURIComponent(formato)}`;
-    window.location.href = url;
+    const busqueda = $('buscador').value;
+    const entidad = selectEnt.value;
+    const formato = $('fFormato').value;
+    const estatus = $('fEstatus').value;
+    window.location.href = `http://localhost:3000/api/exportar-excel?busqueda=${encodeURIComponent(busqueda)}&entidad=${encodeURIComponent(entidad)}&estatus=${encodeURIComponent(estatus)}&formato=${encodeURIComponent(formato)}`;
 };
 
+// Cargar datos iniciales
 fetch('http://localhost:3000/api/resumen')
-    .then(res => res.json())
+    .then(r => r.json())
     .then(data => {
-        document.getElementById("totalSucursales").textContent = data.total;
-        document.getElementById("totalOperativas").textContent = data.operativas;
-        document.getElementById("totalNoOperativas").textContent = data.noOperativas;
-        Object.keys(data.porEntidad).sort().forEach(entidad => {
-            const option = document.createElement("option");
-            option.value = entidad;
-            option.textContent = entidad;
-            selectEntidad.appendChild(option);
+        $('kTotal').textContent = data.total.toLocaleString('es-MX');
+        $('kOp').textContent = data.operativas.toLocaleString('es-MX');
+        $('kNo').textContent = data.noOperativas.toLocaleString('es-MX');
+        Object.keys(data.porEntidad).sort().forEach(ent => {
+            const o = document.createElement('option');
+            o.value = ent; o.textContent = ent;
+            selectEnt.appendChild(o);
         });
     });
 
-document.getElementById("buscador").addEventListener("input", buscar);
-selectEntidad.addEventListener("change", buscar);
-document.getElementById("filtroFormato").addEventListener("change", buscar);
-document.getElementById("filtroEstatus").addEventListener("change", buscar);
+// Cargar direcciones únicas
+fetch('http://localhost:3000/api/sucursales?limite=3500')
+    .then(r => r.json())
+    .then(resp => {
+        const dirs = [...new Set(resp.datos.map(s => s.direccion).filter(Boolean))].sort();
+        dirs.forEach(d => {
+            const o = document.createElement('option');
+            o.value = d; o.textContent = d;
+            selectDir.appendChild(o);
+        });
+    });
+
+$('buscador').addEventListener('input', buscar);
+selectEnt.addEventListener('change', buscar);
+$('fFormato').addEventListener('change', buscar);
+$('fEstatus').addEventListener('change', buscar);
+selectDir.addEventListener('change', buscar);
 
 cargar();
 </script>
+
+<footer style="background:#285C4D;color:rgba(255,255,255,0.6);text-align:center;padding:10px;font-size:10px;margin-top:20px;font-family:'Noto Sans',sans-serif;">
+    Intranet UBS · Sistema interno de gestión de sucursales · Banco del Bienestar ·
+    By <strong style="color:#D4C19C;">M. Antonio G. Angon 👽</strong> · Soporte interno
+</footer>
 
 </body>
 </html>

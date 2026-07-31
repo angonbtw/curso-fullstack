@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Intranet UBS — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --verde: #285C4D;
+            --acento: #D4C19C;
+            --fondo: #eef0f3;
+            --verde-op: #1a6b2f;
+            --rojo-op: #842029;
+            --verde-bg: #d4edda;
+            --rojo-bg: #f8d7da;
+            --azul: #0c447c;
+            --dorado: #9a7200;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans', sans-serif; background: var(--fondo); color: #1a1a1a; font-size: 12px; display: flex; flex-direction: column; min-height: 100vh; }
+
+        header {
+            background: var(--verde);
+            padding: 11px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+        }
+
+        .hl h1 { font-size: 15px; font-weight: 600; color: white; }
+        .hl span { font-size: 10px; color: var(--acento); }
+
+        nav { display: flex; align-items: center; gap: 3px; }
+        nav a { color: rgba(255,255,255,0.65); text-decoration: none; font-size: 12px; padding: 5px 11px; border-radius: 5px; }
+        nav a:hover { color: white; background: rgba(255,255,255,0.1); }
+        nav a.on { color: white; background: rgba(255,255,255,0.15); font-weight: 600; }
+        .btn-n { background: var(--acento); color: var(--verde); border: none; padding: 5px 11px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: 700; font-family: 'Noto Sans', sans-serif; margin-left: 6px; }
+
+        .wrap { max-width: 1500px; margin: 14px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+
+        /* KPIs */
+        .kpis { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+
+        .kpi {
+            background: white;
+            border-radius: 7px;
+            padding: 10px 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            border-top: 2px solid #eee;
+            cursor: default;
+        }
+
+        .kpi.kv { border-top-color: var(--verde); }
+        .kpi.kop { border-top-color: var(--verde-op); }
+        .kpi.kno { border-top-color: var(--rojo-op); }
+        .kpi.ke { border-top-color: var(--azul); }
+        .kpi.kf { border-top-color: #6a0dad; }
+        .kpi.kpct { border-top-color: var(--dorado); }
+        .kpi.kca { border-top-color: #c77800; }
+
+        .kpi-v { font-size: 22px; font-weight: 700; line-height: 1; margin-bottom: 2px; }
+        .kpi.kv .kpi-v { color: var(--verde); }
+        .kpi.kop .kpi-v { color: var(--verde-op); }
+        .kpi.kno .kpi-v { color: var(--rojo-op); }
+        .kpi.ke .kpi-v { color: var(--azul); }
+        .kpi.kf .kpi-v { color: #6a0dad; }
+        .kpi.kpct .kpi-v { color: var(--dorado); }
+        .kpi.kca .kpi-v { color: #c77800; }
+        .kpi-l { font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 0.4px; }
+
+        /* Grids */
+        .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .g21 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+
+        /* Card */
+        .card { background: white; border-radius: 7px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+
+        .card-h {
+            padding: 8px 14px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body { padding: 10px 14px; }
+        canvas { max-height: 130px !important; }
+
+        /* Tabla compacta */
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: #f6f7f9; }
+        th { padding: 6px 11px; font-size: 9px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
+        td { padding: 6px 11px; border-bottom: 1px solid #f3f3f3; font-size: 11px; }
+        tr:last-child td { border-bottom: none; }
+        tr.click:hover td { background: #f5f9ff; cursor: pointer; }
+
+        .badge { padding: 1px 6px; border-radius: 99px; font-size: 9px; font-weight: 700; }
+        .op { background: var(--verde-bg); color: var(--verde-op); }
+        .no-op { background: var(--rojo-bg); color: var(--rojo-op); }
+        .num { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+        .bar-wrap { display: flex; align-items: center; gap: 5px; }
+        .bar-bg { background: #eee; border-radius: 99px; height: 4px; flex: 1; overflow: hidden; min-width: 40px; }
+        .bar-in { height: 100%; border-radius: 99px; background: var(--verde-op); }
+        .bar-pct { font-size: 9px; color: #bbb; min-width: 26px; text-align: right; }
+
+        /* Mapa */
+        .mapa-card { background: white; border-radius: 7px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        iframe { width: 100%; height: 260px; border: none; display: block; }
+
+        /* Btn xs */
+        .btn-xs { background: var(--acento); color: var(--verde); border: none; padding: 3px 9px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: 700; font-family: 'Noto Sans', sans-serif; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 0; border-bottom: 1px solid #eee; }
+        .tab { padding: 7px 14px; font-size: 10px; font-weight: 600; color: #aaa; cursor: pointer; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+        .tab.on { color: var(--verde); border-bottom-color: var(--verde); }
+        .tab-panel { display: none; }
+        .tab-panel.on { display: block; }
+
+        .scroll-t { max-height: 260px; overflow-y: auto; }
+
+        /* Transaccionalidad mini cards */
+        .trans-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 10px 14px; }
+        .trans-card { background: #f8f9fa; border-radius: 6px; padding: 8px 12px; border-left: 3px solid var(--verde); }
+        .trans-card.tc-mb { border-left-color: #c77800; }
+        .trans-card.tc-b { border-left-color: var(--azul); }
+        .trans-card.tc-a { border-left-color: var(--verde-op); }
+        .trans-card.tc-ma { border-left-color: #6a0dad; }
+        .trans-val { font-size: 18px; font-weight: 700; color: var(--verde); }
+        .trans-card.tc-mb .trans-val { color: #c77800; }
+        .trans-card.tc-b .trans-val { color: var(--azul); }
+        .trans-card.tc-a .trans-val { color: var(--verde-op); }
+        .trans-card.tc-ma .trans-val { color: #6a0dad; }
+        .trans-lbl { font-size: 9px; color: #888; text-transform: uppercase; }
+        .trans-sub { font-size: 9px; color: #aaa; margin-top: 1px; }
+
+        /* Modal */
+        .mo { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; justify-content: center; align-items: center; }
+        .mo.on { display: flex; }
+        .modal { background: white; border-radius: 10px; max-width: 900px; width: 95%; max-height: 88vh; display: flex; flex-direction: column; }
+        .mh { background: var(--verde); padding: 13px 18px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .mh h2 { color: white; font-size: 14px; }
+        .mh small { color: var(--acento); font-size: 10px; display: block; margin-top: 2px; }
+        .mc { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+        .macc { padding: 8px 14px; border-bottom: 1px solid #eee; display: flex; gap: 6px; flex-shrink: 0; }
+        .mb { overflow-y: auto; flex: 1; }
+        .mb table thead th { background: #f0f2f5; position: sticky; top: 0; z-index: 1; }
+
+        /* Footer */
+        footer {
+            background: var(--verde);
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 10px;
+            font-size: 10px;
+            margin-top: auto;
+        }
+        footer strong { color: var(--acento); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="hl">
+        <h1>Intranet UBS</h1>
+        <span>Sistema interno de gestión de sucursales</span>
+    </div>
+    <nav>
+        <a href="dashboard.html" class="on">Dashboard</a>
+        <a href="intranet-ubs.html">Directorio</a>
+        <button class="btn-n" onclick="expResumen()">⬇ Exportar resumen</button>
+    </nav>
+</header>
+
+<div class="wrap">
+
+    <!-- KPIs -->
+    <div class="kpis">
+        <div class="kpi kv"><div class="kpi-v" id="kT">...</div><div class="kpi-l">Total sucursales</div></div>
+        <div class="kpi kop"><div class="kpi-v" id="kO">...</div><div class="kpi-l">Operativas</div></div>
+        <div class="kpi kno"><div class="kpi-v" id="kN">...</div><div class="kpi-l">No operativas</div></div>
+        <div class="kpi kpct"><div class="kpi-v" id="kP">...</div><div class="kpi-l">% Operativas</div></div>
+        <div class="kpi ke"><div class="kpi-v" id="kE">...</div><div class="kpi-l">Entidades</div></div>
+        <div class="kpi kf"><div class="kpi-v" id="kD">...</div><div class="kpi-l">Gerencias</div></div>
+        <div class="kpi kca"><div class="kpi-v" id="kC">...</div><div class="kpi-l">Cajeros ATM totales</div></div>
+    </div>
+
+    <!-- Gráficas top -->
+    <div class="g3">
+        <div class="card">
+            <div class="card-h">Operativas vs No operativas</div>
+            <div class="card-body"><canvas id="cDonut"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-h">Por formato de sucursal</div>
+            <div class="card-body"><canvas id="cFormato"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-h">Transaccionalidad</div>
+            <div id="transGrid" class="trans-grid"></div>
+        </div>
+    </div>
+
+    <!-- Mapa + tabla entidades -->
+    <div class="g21">
+        <div class="card">
+            <div class="tabs">
+                <div class="tab on" onclick="showTab('entidad',this)">Por entidad</div>
+                <div class="tab" onclick="showTab('subdireccion',this)">Por subdirección</div>
+                <div class="tab" onclick="showTab('direccion',this)">Por dirección</div>
+                <div class="tab" onclick="showTab('gerencia',this)">Por gerencia</div>
+            </div>
+
+            <div id="tab-entidad" class="tab-panel on">
+                <div class="card-h" style="border-bottom:none;">Entidades federativas — orden alfabético <button class="btn-xs" onclick="expTabla('entidad')">⬇ CSV</button></div>
+                <div class="scroll-t"><table><thead><tr><th>Entidad</th><th class="num">Total</th><th class="num">Op.</th><th class="num">No op.</th><th>% Op.</th></tr></thead><tbody id="tEnt"></tbody></table></div>
+            </div>
+            <div id="tab-subdireccion" class="tab-panel">
+                <div class="card-h" style="border-bottom:none;">Por subdirección <button class="btn-xs" onclick="expTabla('subdireccion')">⬇ CSV</button></div>
+                <div class="scroll-t"><table><thead><tr><th>Subdirección</th><th class="num">Total</th><th class="num">Op.</th><th class="num">No op.</th><th>% Op.</th></tr></thead><tbody id="tSub"></tbody></table></div>
+            </div>
+            <div id="tab-direccion" class="tab-panel">
+                <div class="card-h" style="border-bottom:none;">Por dirección <button class="btn-xs" onclick="expTabla('direccion')">⬇ CSV</button></div>
+                <div class="scroll-t"><table><thead><tr><th>Dirección</th><th class="num">Total</th><th class="num">Op.</th><th class="num">No op.</th><th>% Op.</th></tr></thead><tbody id="tDir"></tbody></table></div>
+            </div>
+            <div id="tab-gerencia" class="tab-panel">
+                <div class="card-h" style="border-bottom:none;">Por gerencia <button class="btn-xs" onclick="expTabla('gerencia')">⬇ CSV</button></div>
+                <div class="scroll-t"><table><thead><tr><th>Gerencia</th><th class="num">Total</th><th class="num">Op.</th><th class="num">No op.</th><th>% Op.</th></tr></thead><tbody id="tGer"></tbody></table></div>
+            </div>
+        </div>
+
+        <div class="mapa-card">
+            <div class="card-h" style="padding:8px 14px;border-bottom:1px solid #f0f0f0;">📍 Mapa de sucursales</div>
+            <iframe src="https://www.google.com/maps/d/embed?mid=1xVM2z4O_Iwbd8_UEn6HB6wDC5Ef_K26R&hl=es-419" allowfullscreen loading="lazy"></iframe>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    Intranet UBS · Sistema interno de gestión de sucursales · Banco del Bienestar ·
+    By <strong>M. Antonio G. Angon 👽</strong> · Soporte interno
+</footer>
+
+<!-- Modal -->
+<div class="mo" id="mo" onclick="if(event.target.id==='mo')cerrar()">
+    <div class="modal">
+        <div class="mh">
+            <div><h2 id="mT"></h2><small id="mS"></small></div>
+            <button class="mc" onclick="cerrar()">✕</button>
+        </div>
+        <div class="macc">
+            <button class="btn-xs" onclick="expM('TODAS')">⬇ Todas</button>
+            <button class="btn-xs" style="background:var(--verde-bg);color:var(--verde-op)" onclick="expM('OPERATIVAS')">✓ Operativas</button>
+            <button class="btn-xs" style="background:var(--rojo-bg);color:var(--rojo-op)" onclick="expM('NO OPERATIVAS')">✕ No operativas</button>
+        </div>
+        <div class="mb">
+            <table>
+                <thead><tr><th>CC</th><th>Nombre</th><th>Entidad</th><th>Municipio</th><th>Formato</th><th>Estatus</th></tr></thead>
+                <tbody id="mTabla"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let rG = null, mD = [];
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString('es-MX');
+const font = { family: 'Noto Sans', size: 10 };
+const cerrar = () => $('mo').classList.remove('on');
+
+const showTab = (id, el) => {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('on'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+    $('tab-'+id).classList.add('on');
+    el.classList.add('on');
+};
+
+const csv = (filas, nombre) => {
+    const c = filas.map(f => f.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff'+c],{type:'text/csv;charset=utf-8;'}));
+    a.download = nombre; a.click();
+};
+
+const expResumen = () => {
+    if (!rG) return;
+    const enc = ['Entidad','Total','Operativas','No Operativas','% Op'];
+    const f = Object.entries(rG.porEntidad).sort((a,b)=>a[0].localeCompare(b[0]))
+        .map(([n,d])=>[n,d.total,d.operativas,d.noOperativas,Math.round(d.operativas/d.total*100)+'%']);
+    csv([enc,...f], 'resumen_ubs.csv');
+};
+
+const expTabla = (tipo) => {
+    if (!rG) return;
+    const mapa = { entidad: rG.porEntidad, subdireccion: rG.porSubdireccion, direccion: rG.porDireccion, gerencia: rG.porGerencia };
+    const enc = ['Nombre','Total','Operativas','No Operativas','% Op'];
+    const f = Object.entries(mapa[tipo]||{}).sort((a,b)=>a[0].localeCompare(b[0]))
+        .map(([n,d])=>[n,d.total,d.operativas,d.noOperativas,Math.round(d.operativas/d.total*100)+'%']);
+    csv([enc,...f], `${tipo}_ubs.csv`);
+};
+
+const expM = (filtro) => {
+    let d = filtro==='TODAS' ? mD : mD.filter(s=>s.estatus===filtro);
+    csv([['CC','Nombre','Entidad','Municipio','Formato','Estatus'],...d.map(s=>[s.cc,s.nombre,s.entidad,s.municipio,s.formato,s.estatus])],
+        `sucursales_${filtro.toLowerCase().replace(' ','_')}.csv`);
+};
+
+const abrirDetalle = (campo, valor, datos) => {
+    $('mT').textContent = valor;
+    $('mS').textContent = `${datos.total} sucursales · ${datos.operativas} operativas · ${datos.noOperativas} no operativas`;
+    $('mTabla').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#aaa">Cargando...</td></tr>';
+    $('mo').classList.add('on');
+    const apiMap = { entidad:'entidad', subdireccion:'subdireccion', direccion:'direccion', gerencia:'gerencia' };
+    fetch(`http://localhost:3000/api/sucursales?limite=500&${apiMap[campo]}=${encodeURIComponent(valor)}`)
+        .then(r=>r.json())
+        .then(resp => {
+            mD = resp.datos;
+            $('mTabla').innerHTML = resp.datos.map(s=>`
+                <tr>
+                    <td><strong>${s.cc}</strong></td><td>${s.nombre}</td>
+                    <td>${s.entidad}</td><td>${s.municipio}</td><td>${s.formato}</td>
+                    <td><span class="badge ${s.estatus==='OPERATIVAS'?'op':'no-op'}">${s.estatus}</span></td>
+                </tr>`).join('');
+        });
+};
+
+const renderTabla = (tbody, datos, campo, ordenAlfabetico=false) => {
+    let entradas = Object.entries(datos);
+    if (ordenAlfabetico) {
+        entradas = entradas.sort((a,b)=>a[0].localeCompare(b[0]));
+    } else {
+        entradas = entradas.sort((a,b)=>b[1].total-a[1].total);
+    }
+    entradas.forEach(([nombre,d]) => {
+        const p = Math.round(d.operativas/d.total*100);
+        const tr = document.createElement('tr');
+        tr.className = 'click';
+        tr.onclick = () => abrirDetalle(campo, nombre, d);
+        tr.innerHTML = `
+            <td><strong>${nombre||'—'}</strong></td>
+            <td class="num">${d.total}</td>
+            <td class="num"><span class="badge op">${d.operativas}</span></td>
+            <td class="num"><span class="badge no-op">${d.noOperativas}</span></td>
+            <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-in" style="width:${p}%"></div></div><span class="bar-pct">${p}%</span></div></td>
+        `;
+        tbody.appendChild(tr);
+    });
+};
+
+const transClases = { 'MUY BAJA':'tc-mb', 'BAJA':'tc-b', 'MEDIA':'', 'ALTA':'tc-a', 'MUY ALTA':'tc-ma' };
+
+fetch('http://localhost:3000/api/resumen')
+    .then(r=>r.json())
+    .then(data => {
+        rG = data;
+        const pct = Math.round(data.operativas/data.total*100);
+
+        $('kT').textContent = fmt(data.total);
+        $('kO').textContent = fmt(data.operativas);
+        $('kN').textContent = fmt(data.noOperativas);
+        $('kP').textContent = pct+'%';
+        $('kE').textContent = Object.keys(data.porEntidad).length;
+        $('kD').textContent = Object.keys(data.porGerencia).length;
+        $('kC').textContent = fmt(data.totalCajeros || 0);
+
+        const co = { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { font, boxWidth: 8, padding: 8 } } } };
+
+        // Donut operativas
+        new Chart($('cDonut'), {
+            type: 'doughnut',
+            data: { labels: ['Operativas','No operativas'], datasets: [{ data: [data.operativas, data.noOperativas], backgroundColor: ['#285C4D','#842029'], borderWidth: 0 }] },
+            options: { ...co, cutout: '70%' }
+        });
+
+        // Formato — TRADICIONAL en rojo, EXPANSIÓN en verde
+        const fmtData = Object.entries(data.porFormato).sort((a,b)=>b[1].total-a[1].total);
+        const fmtColors = fmtData.map(([n]) => n.trim().toUpperCase().includes('TRADICIONAL') ? '#842029' : '#285C4D');
+        new Chart($('cFormato'), {
+            type: 'doughnut',
+            data: { labels: fmtData.map(([n])=>n), datasets: [{ data: fmtData.map(([,d])=>d.total), backgroundColor: fmtColors, borderWidth: 0 }] },
+            options: { ...co, cutout: '70%' }
+        });
+
+        // Transaccionalidad — mini cards
+        const ordenTrans = ['MUY BAJA','BAJA','MEDIA','ALTA','MUY ALTA'];
+        const transDiv = $('transGrid');
+        transDiv.innerHTML = '';
+        ordenTrans.forEach(nivel => {
+            const d = data.porTransaccionalidad?.[nivel];
+            if (!d) return;
+            const pctT = Math.round(d.operativas/d.total*100);
+            const cls = transClases[nivel] || '';
+            transDiv.innerHTML += `
+                <div class="trans-card ${cls}">
+                    <div class="trans-val">${fmt(d.total)}</div>
+                    <div class="trans-lbl">${nivel}</div>
+                    <div class="trans-sub">${d.operativas} op · ${d.noOperativas} no op · ${pctT}% op</div>
+                </div>
+            `;
+        });
+
+        // Tablas
+        renderTabla($('tEnt'), data.porEntidad, 'entidad', true);  // alfabético
+        renderTabla($('tSub'), data.porSubdireccion, 'subdireccion');
+        renderTabla($('tDir'), data.porDireccion, 'direccion');
+        renderTabla($('tGer'), data.porGerencia, 'gerencia');
+    });
+</script>
+
+</body>
+</html>
