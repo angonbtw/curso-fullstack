@@ -26,9 +26,26 @@ const cargarSucursales = () => {
         localidad: String(fila['LOCALIDAD'] || ''),
         latitud: fila['LATITUD'] || null,
         longitud: fila['LONGITUD'] || null,
-        direccion: String(fila['DIRECCION'] || ''),
-        subdireccion: String(fila['SUBDIRECCION'] || ''),
-        gerencia: String(fila['GERENCIA'] || '')
+        maps: String(fila['LINK GOOGLE MAPS'] || ''),
+        direccionCompleta: String(fila['DOMICILIO COMPLETO'] || ''),
+        vialidad: String(fila['VIALIDAD'] || ''),
+        exterior: String(fila['N° EXTERIOR'] || ''),
+        colonia: String(fila['COLONIA'] || ''),
+        cp: String(fila['C.P.'] || ''),
+        referencias: String(fila['REFERENCIAS'] || ''),
+        direccion: String(fila['DIRECCIÓN'] || ''),
+        subdireccion: String(fila['SUBDIRECIÓN'] || ''),
+        nombreSubdirectora: String(fila['NOMBRE DE LA SUBDIRECTORA'] || ''),
+        gerencia: String(fila['GERENCIA'] || ''),
+        nombreGerente: String(fila['NOMBRE DEL (LA) GERENTE'] || ''),
+        coordinacion: String(fila['COORDINACIÓN ESTATAL'] || ''),
+        nombreCoordinador: String(fila['NOMBRE DEL (LA) COORDINADOR(A) REGIONAL/ESTATAL'] || ''),
+        cajeros: fila['TOTAL DE CAJEROS ATM'] || 0,
+        ventanillas: fila['VENTANILLAS ACT'] || 0,
+        transaccionalidad: String(fila[' TRANSACCIONALIDAD MAYO'] || ''),
+        entornoSocio: String(fila['ENTORNO SOCIODEMOGRÁFICO'] || ''),
+        claveSedena: String(fila['CLAVE SEDENA'] || ''),
+        fechaApertura: String(fila['FECHA DE APERTURA UBD'] || '')
     }));
 };
 
@@ -43,23 +60,22 @@ app.get('/api/sucursales', (req, res) => {
     const busqueda = (req.query.busqueda || '').toLowerCase();
     const entidad = req.query.entidad || '';
     const estatus = req.query.estatus || '';
+    const formato = req.query.formato || '';
+    const direccion = req.query.direccion || '';
 
     let filtradas = sucursales;
 
     if (busqueda) {
         filtradas = filtradas.filter(s =>
             s.nombre.toLowerCase().includes(busqueda) ||
-            s.cc.includes(busqueda)
+            s.cc.includes(busqueda) ||
+            s.municipio.toLowerCase().includes(busqueda)
         );
     }
-
-    if (entidad) {
-        filtradas = filtradas.filter(s => s.entidad === entidad);
-    }
-
-    if (estatus) {
-        filtradas = filtradas.filter(s => s.estatus === estatus);
-    }
+    if (entidad) filtradas = filtradas.filter(s => s.entidad === entidad);
+    if (estatus) filtradas = filtradas.filter(s => s.estatus === estatus);
+    if (formato) filtradas = filtradas.filter(s => s.formato === formato);
+    if (direccion) filtradas = filtradas.filter(s => s.direccion === direccion);
 
     const total = filtradas.length;
     const inicio = (pagina - 1) * limite;

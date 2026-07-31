@@ -27,27 +27,23 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        header h1 {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        header span {
-            font-size: 13px;
-            color: var(--color-acento);
-        }
+        header h1 { font-size: 20px; font-weight: 600; }
+        header span { font-size: 13px; color: var(--color-acento); }
 
         .contenedor {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 32px auto;
             padding: 0 24px;
         }
 
         .filtros {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             margin-bottom: 20px;
             align-items: center;
             flex-wrap: wrap;
@@ -61,19 +57,35 @@
             background: white;
         }
 
-        .toggle-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
+        .filtros input { min-width: 220px; }
 
         .resumen {
             font-size: 13px;
             color: #666;
             margin-left: auto;
         }
+
+        .tarjetas-resumen {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .tarjeta-stat {
+            background: white;
+            border-radius: 10px;
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            min-width: 160px;
+        }
+
+        .stat-numero { font-size: 28px; font-weight: 700; color: var(--color-principal); }
+        .stat-numero.verde { color: #1a6b2f; }
+        .stat-numero.rojo { color: #842029; }
+        .stat-label { font-size: 12px; color: #888; }
 
         table {
             width: 100%;
@@ -84,26 +96,11 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        thead {
-            background: var(--color-principal);
-            color: white;
-        }
-
-        th {
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        td {
-            padding: 11px 16px;
-            font-size: 13px;
-            border-bottom: 1px solid #eee;
-        }
-
+        thead { background: var(--color-principal); color: white; }
+        th { padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 500; }
+        td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid #eee; }
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #f0f4ff; }
+        tr:hover td { background: #f0f4ff; cursor: pointer; }
 
         .badge {
             padding: 3px 10px;
@@ -114,63 +111,97 @@
 
         .operativa { background: #d4edda; color: #1a6b2f; }
         .no-operativa { background: #f8d7da; color: #842029; }
-        .tarjetas-resumen {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-}
 
-.tarjeta-stat {
-    background: white;
-    border-radius: 10px;
-    padding: 16px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    min-width: 160px;
-}
+        .paginacion {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            justify-content: center;
+            align-items: center;
+        }
 
-.stat-numero {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--color-principal);
-}
+        .paginacion button {
+            background: var(--color-principal);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
-.stat-numero.verde { color: #1a6b2f; }
-.stat-numero.rojo { color: #842029; }
+        .paginacion button:disabled { background: #ccc; cursor: not-allowed; }
+        .paginacion span { font-size: 13px; color: #666; }
 
-.stat-label {
-    font-size: 12px;
-    color: #888;
-}    
-.paginacion {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-    justify-content: center;
-}
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
 
-.paginacion button {
-    background: var(--color-principal);
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-}
+        .modal-overlay.activo { display: flex; }
 
-.paginacion button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-  </style>
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-cerrar {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal h2 { color: var(--color-principal); margin-bottom: 20px; font-size: 18px; }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .modal-campo label { font-size: 11px; color: #888; text-transform: uppercase; }
+        .modal-campo span { font-size: 13px; font-weight: 500; color: #222; }
+
+        .modal-maps {
+            margin-top: 20px;
+            display: block;
+            background: var(--color-principal);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
 
 <header>
-        <div>
+    <div>
         <h1>Intranet UBS — Directorio de Sucursales</h1>
         <span>Sistema interno de gestión de sucursales</span>
     </div>
@@ -178,30 +209,38 @@
 
 <div class="contenedor">
     <div class="filtros">
-        <input type="text" id="buscador" placeholder="🔍 Buscar sucursal...">
+        <input type="text" id="buscador" placeholder="🔍 Buscar por CC, nombre o municipio...">
         <select id="filtroEntidad">
             <option value="">Todas las entidades</option>
         </select>
-        <label class="toggle-label">
-            <input type="checkbox" id="toggleNoOperativas" checked>
-            Mostrar no operativas
-        </label>
+        <select id="filtroFormato">
+            <option value="">Todos los formatos</option>
+            <option value="TRADICIONAL">Tradicional</option>
+            <option value="EXPANSIÓN">Expansión</option>
+        </select>
+        <select id="filtroEstatus">
+            <option value="">Todos los estatus</option>
+            <option value="OPERATIVAS">Operativas</option>
+            <option value="NO OPERATIVAS">No operativas</option>
+        </select>
         <span class="resumen" id="resumen"></span>
     </div>
-<div class="tarjetas-resumen">
-    <div class="tarjeta-stat">
-        <span class="stat-numero" id="totalSucursales">0</span>
-        <span class="stat-label">Total sucursales</span>
+
+    <div class="tarjetas-resumen">
+        <div class="tarjeta-stat">
+            <span class="stat-numero" id="totalSucursales">...</span>
+            <span class="stat-label">Total sucursales</span>
+        </div>
+        <div class="tarjeta-stat">
+            <span class="stat-numero verde" id="totalOperativas">...</span>
+            <span class="stat-label">Operativas</span>
+        </div>
+        <div class="tarjeta-stat">
+            <span class="stat-numero rojo" id="totalNoOperativas">...</span>
+            <span class="stat-label">No operativas</span>
+        </div>
     </div>
-    <div class="tarjeta-stat">
-        <span class="stat-numero verde" id="totalOperativas">0</span>
-        <span class="stat-label">Operativas</span>
-    </div>
-    <div class="tarjeta-stat">
-        <span class="stat-numero rojo" id="totalNoOperativas">0</span>
-        <span class="stat-label">No operativas</span>
-    </div>
-</div>
+
     <table>
         <thead>
             <tr>
@@ -215,25 +254,74 @@
         </thead>
         <tbody id="tablaSucursales"></tbody>
     </table>
-<div class="paginacion">
-    <button id="btnAnterior" onclick="paginaActual--; cargar()">← Anterior</button>
-    <button id="btnSiguiente" onclick="paginaActual++; cargar()">Siguiente →</button>
+
+    <div class="paginacion">
+        <button id="btnAnterior" onclick="cambiarPagina(-1)">← Anterior</button>
+        <span id="infoPagina"></span>
+        <button id="btnSiguiente" onclick="cambiarPagina(1)">Siguiente →</button>
+    </div>
 </div>
 
+<!-- Modal detalle -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModal(event)">
+    <div class="modal">
+        <button class="modal-cerrar" onclick="document.getElementById('modalOverlay').classList.remove('activo')">✕</button>
+        <h2 id="modalNombre"></h2>
+        <div class="modal-grid" id="modalContenido"></div>
+        <a id="modalMaps" class="modal-maps" target="_blank">📍 Ver en Google Maps</a>
+    </div>
 </div>
 
 <script>
 const selectEntidad = document.getElementById("filtroEntidad");
 let paginaActual = 1;
 const LIMITE = 50;
-let cargando = false;
-let totalCargado = 0;
 let totalGeneral = 0;
+
+const abrirModal = (s) => {
+    document.getElementById("modalNombre").textContent = s.nombre;
+    document.getElementById("modalMaps").href = s.maps || '#';
+    document.getElementById("modalMaps").style.display = s.maps ? 'block' : 'none';
+
+    document.getElementById("modalContenido").innerHTML = `
+    <div class="modal-campo"><label>CC</label><span>${s.cc}</span></div>
+    <div class="modal-campo"><label>Estatus</label><span>${s.estatus}</span></div>
+    <div class="modal-campo"><label>Formato</label><span>${s.formato}</span></div>
+    <div class="modal-campo"><label>Clave SEDENA</label><span>${s.claveSedena}</span></div>
+    <div class="modal-campo"><label>Entidad</label><span>${s.entidad}</span></div>
+    <div class="modal-campo"><label>Municipio</label><span>${s.municipio}</span></div>
+    <div class="modal-campo"><label>Localidad</label><span>${s.localidad}</span></div>
+    <div class="modal-campo"><label>Colonia</label><span>${s.colonia}</span></div>
+    <div class="modal-campo"><label>Vialidad</label><span>${s.vialidad} ${s.exterior}</span></div>
+    <div class="modal-campo"><label>C.P.</label><span>${s.cp}</span></div>
+    <div class="modal-campo"><label>Referencias</label><span>${s.referencias}</span></div>
+    <div class="modal-campo"><label>Dirección</label><span>${s.direccion}</span></div>
+    <div class="modal-campo"><label>Subdirección</label><span>${s.subdireccion}</span></div>
+    <div class="modal-campo"><label>Subdirectora</label><span>${s.nombreSubdirectora}</span></div>
+    <div class="modal-campo"><label>Gerencia</label><span>${s.gerencia}</span></div>
+    <div class="modal-campo"><label>Gerente</label><span>${s.nombreGerente}</span></div>
+    <div class="modal-campo"><label>Coordinación</label><span>${s.coordinacion}</span></div>
+    <div class="modal-campo"><label>Coordinador</label><span>${s.nombreCoordinador}</span></div>
+    <div class="modal-campo"><label>Cajeros ATM</label><span>${s.cajeros}</span></div>
+    <div class="modal-campo"><label>Ventanillas</label><span>${s.ventanillas}</span></div>
+    <div class="modal-campo"><label>Transaccionalidad</label><span>${s.transaccionalidad}</span></div>
+    <div class="modal-campo"><label>Entorno</label><span>${s.entornoSocio}</span></div>
+    <div class="modal-campo"><label>Fecha apertura</label><span>${s.fechaApertura}</span></div>
+`;
+
+    document.getElementById("modalOverlay").classList.add("activo");
+};
+
+const cerrarModal = (e) => {
+    if (e.target === document.getElementById("modalOverlay")) {
+        document.getElementById("modalOverlay").classList.remove("activo");
+    }
+};
 
 const renderFila = (s) => {
     const esOp = s.estatus === "OPERATIVAS";
     return `
-        <tr>
+        <tr onclick='abrirModal(${JSON.stringify(s)})'>
             <td>${s.cc}</td>
             <td>${s.nombre}</td>
             <td>${s.formato}</td>
@@ -244,50 +332,43 @@ const renderFila = (s) => {
     `;
 };
 
-const buscar = () => {
-    paginaActual = 1;
-    totalCargado = 0;
-    document.getElementById("tablaSucursales").innerHTML = "";
-    cargar();
-};
-
 const cargar = () => {
     const busqueda = document.getElementById("buscador").value;
     const entidad = selectEntidad.value;
-    const mostrarNoOp = document.getElementById("toggleNoOperativas").checked;
-    const estatus = mostrarNoOp ? '' : 'OPERATIVAS';
+    const formato = document.getElementById("filtroFormato").value;
+    const estatus = document.getElementById("filtroEstatus").value;
 
-    const url = `http://localhost:3000/api/sucursales?pagina=${paginaActual}&limite=${LIMITE}&busqueda=${busqueda}&entidad=${entidad}&estatus=${estatus}`;
+    const url = `http://localhost:3000/api/sucursales?pagina=${paginaActual}&limite=${LIMITE}&busqueda=${encodeURIComponent(busqueda)}&entidad=${encodeURIComponent(entidad)}&estatus=${encodeURIComponent(estatus)}&formato=${encodeURIComponent(formato)}`;
 
     fetch(url)
         .then(res => res.json())
         .then(respuesta => {
             totalGeneral = respuesta.total;
-
             const tbody = document.getElementById("tablaSucursales");
             tbody.innerHTML = "";
+            respuesta.datos.forEach(s => { tbody.innerHTML += renderFila(s); });
 
-            respuesta.datos.forEach(s => {
-                tbody.innerHTML += renderFila(s);
-            });
-
-            document.getElementById("resumen").textContent = 
-                `Página ${paginaActual} — ${respuesta.datos.length} de ${totalGeneral} sucursales`;
-            
+            const totalPaginas = Math.ceil(totalGeneral / LIMITE);
+            document.getElementById("resumen").textContent = `${totalGeneral} sucursales`;
+            document.getElementById("infoPagina").textContent = `Página ${paginaActual} de ${totalPaginas}`;
             document.getElementById("btnAnterior").disabled = paginaActual === 1;
-            document.getElementById("btnSiguiente").disabled = 
-                paginaActual * LIMITE >= totalGeneral;
+            document.getElementById("btnSiguiente").disabled = paginaActual >= totalPaginas;
         });
 };
 
-// Cargar entidades para el filtro
+const cambiarPagina = (dir) => {
+    paginaActual += dir;
+    cargar();
+};
+
+const buscar = () => { paginaActual = 1; cargar(); };
+
 fetch('http://localhost:3000/api/resumen')
     .then(res => res.json())
     .then(data => {
         document.getElementById("totalSucursales").textContent = data.total;
         document.getElementById("totalOperativas").textContent = data.operativas;
         document.getElementById("totalNoOperativas").textContent = data.noOperativas;
-
         Object.keys(data.porEntidad).sort().forEach(entidad => {
             const option = document.createElement("option");
             option.value = entidad;
@@ -298,7 +379,8 @@ fetch('http://localhost:3000/api/resumen')
 
 document.getElementById("buscador").addEventListener("input", buscar);
 selectEntidad.addEventListener("change", buscar);
-document.getElementById("toggleNoOperativas").addEventListener("change", buscar);
+document.getElementById("filtroFormato").addEventListener("change", buscar);
+document.getElementById("filtroEstatus").addEventListener("change", buscar);
 
 cargar();
 </script>
