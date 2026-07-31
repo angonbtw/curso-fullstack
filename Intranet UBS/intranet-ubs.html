@@ -198,29 +198,10 @@
 </div>
 
 <script>
-const sucursales = [
-    { cc: "4197", nombre: "CHAPARROSA", formato: "EXPANSIÓN", estatus: "OPERATIVAS", entidad: "ZACATECAS", municipio: "VILLA DE COS" },
-    { cc: "4198", nombre: "VILLANUEVA", formato: "EXPANSIÓN", estatus: "OPERATIVAS", entidad: "ZACATECAS", municipio: "VILLANUEVA" },
-    { cc: "3776", nombre: "EUROPA, ZACATECAS", formato: "EXPANSIÓN", estatus: "OPERATIVAS", entidad: "ZACATECAS", municipio: "ZACATECAS" },
-    { cc: "329", nombre: "AGUASCALIENTES PLAZA CRYSTAL", formato: "TRADICIONAL", estatus: "OPERATIVAS", entidad: "AGUASCALIENTES", municipio: "AGUASCALIENTES" },
-    { cc: "268", nombre: "ENSENADA", formato: "TRADICIONAL", estatus: "OPERATIVAS", entidad: "BAJA CALIFORNIA", municipio: "ENSENADA" },
-    { cc: "224", nombre: "MEXICALI", formato: "TRADICIONAL", estatus: "OPERATIVAS", entidad: "BAJA CALIFORNIA", municipio: "MEXICALI" },
-    { cc: "244", nombre: "TIJUANA", formato: "TRADICIONAL", estatus: "OPERATIVAS", entidad: "BAJA CALIFORNIA", municipio: "TIJUANA" },
-    { cc: "408", nombre: "SPM TIJUANA", formato: "TRADICIONAL", estatus: "NO OPERATIVAS", entidad: "BAJA CALIFORNIA", municipio: "TIJUANA" },
-    { cc: "218", nombre: "LA PAZ", formato: "TRADICIONAL", estatus: "NO OPERATIVAS", entidad: "BAJA CALIFORNIA SUR", municipio: "LA PAZ" }
-];
 
-// Llenar filtro de entidades
-const entidades = [...new Set(sucursales.map(s => s.entidad))].sort();
 const selectEntidad = document.getElementById("filtroEntidad");
-entidades.forEach(entidad => {
-    const option = document.createElement("option");
-    option.value = entidad;
-    option.textContent = entidad;
-    selectEntidad.appendChild(option);
-});
 
-const renderTabla = () => {
+const renderTabla = (sucursales) => {
     const busqueda = document.getElementById("buscador").value.toLowerCase();
     const entidadFiltro = selectEntidad.value;
     const mostrarNoOp = document.getElementById("toggleNoOperativas").checked;
@@ -250,16 +231,30 @@ const renderTabla = () => {
     });
 
     document.getElementById("resumen").textContent = `${filtradas.length} sucursales`;
-document.getElementById("totalSucursales").textContent = filtradas.length;
-document.getElementById("totalOperativas").textContent = filtradas.filter(s => s.estatus === "OPERATIVAS").length;
-document.getElementById("totalNoOperativas").textContent = filtradas.filter(s => s.estatus === "NO OPERATIVAS").length;
+    document.getElementById("totalSucursales").textContent = filtradas.length;
+    document.getElementById("totalOperativas").textContent = filtradas.filter(s => s.estatus === "OPERATIVAS").length;
+    document.getElementById("totalNoOperativas").textContent = filtradas.filter(s => s.estatus === "NO OPERATIVAS").length;
 };
 
-document.getElementById("buscador").addEventListener("input", renderTabla);
-selectEntidad.addEventListener("change", renderTabla);
-document.getElementById("toggleNoOperativas").addEventListener("change", renderTabla);
+// Cargar datos desde el servidor
+fetch('http://localhost:3000/api/sucursales')
+    .then(res => res.json())
+    .then(sucursales => {
+        const entidades = [...new Set(sucursales.map(s => s.entidad))].sort();
+        entidades.forEach(entidad => {
+            const option = document.createElement("option");
+            option.value = entidad;
+            option.textContent = entidad;
+            selectEntidad.appendChild(option);
+        });
 
-renderTabla();
+        renderTabla(sucursales);
+
+        document.getElementById("buscador").addEventListener("input", () => renderTabla(sucursales));
+        selectEntidad.addEventListener("change", () => renderTabla(sucursales));
+        document.getElementById("toggleNoOperativas").addEventListener("change", () => renderTabla(sucursales));
+    });
+
 </script>
 
 </body>
